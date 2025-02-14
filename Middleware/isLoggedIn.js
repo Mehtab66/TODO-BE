@@ -1,5 +1,6 @@
 // Middleware/isLoggedIn.js
-import { auth } from "express-oauth2-jwt-bearer";
+
+const { auth } = require("express-oauth2-jwt-bearer");
 
 const checkJwt = auth({
   audience: process.env.AUDIENCE,
