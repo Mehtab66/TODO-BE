@@ -1,6 +1,7 @@
-const User = require("../Models/User");
-const Task = require("../Models/Task");
-module.exports.checkUser = async (req, res) => {
+const User = require("../Models/User.js");
+const Task = require("../Models/Task.js");
+
+const checkUser = async (req, res) => {
   const { auth0Id, email, name } = req.body;
   console.log(auth0Id, email, name);
   try {
@@ -23,12 +24,10 @@ module.exports.checkUser = async (req, res) => {
   }
 };
 
-//get all tasks
-module.exports.getTasks = async (req, res) => {
+// Get all tasks
+const getTasks = async (req, res) => {
   try {
     const { userId } = req.query;
-
-    // Fetch tasks where isDeleted is false, and sort them by createdAt in descending order (newest first)
     const tasks = await Task.find({ userId, isDeleted: { $ne: true } }).sort({
       createdAt: -1,
     });
@@ -39,17 +38,13 @@ module.exports.getTasks = async (req, res) => {
   }
 };
 
-//addTask
-module.exports.addTask = async (req, res) => {
+// Add a task
+const addTask = async (req, res) => {
   try {
     const { userId, name, description, status } = req.body;
     console.log(userId, name, description, status);
-    const newTask = new Task({
-      userId,
-      name,
-      description,
-      status,
-    });
+    const newTask = new Task({ userId, name, description, status });
+
     await newTask.save();
     res.status(201).json({ task: newTask });
   } catch (error) {
@@ -58,11 +53,10 @@ module.exports.addTask = async (req, res) => {
   }
 };
 
-module.exports.deleteTask = async (req, res) => {
+// Delete a task
+const deleteTask = async (req, res) => {
   try {
     const { id } = req.params;
-
-    // Find the task by ID and mark it as deleted
     const task = await Task.findByIdAndUpdate(
       id,
       { isDeleted: true },
@@ -72,15 +66,16 @@ module.exports.deleteTask = async (req, res) => {
     if (!task) {
       return res.status(404).json({ message: "Task not found" });
     }
-    return res.status(200).json({ message: "Task deleted successfully", task });
+
+    res.status(200).json({ message: "Task deleted successfully", task });
   } catch (error) {
     console.error(error);
-    return res.status(500).json({ message: "Server error" });
+    res.status(500).json({ message: "Server error" });
   }
 };
 
 // Fetch a single task by ID
-module.exports.getTaskById = async (req, res) => {
+const getTaskById = async (req, res) => {
   try {
     const { id } = req.params;
     const task = await Task.findById(id);
@@ -88,6 +83,7 @@ module.exports.getTaskById = async (req, res) => {
     if (!task) {
       return res.status(404).json({ message: "Task not found" });
     }
+
     console.log(task);
     res.status(200).json({ task });
   } catch (error) {
@@ -97,11 +93,12 @@ module.exports.getTaskById = async (req, res) => {
 };
 
 // Update a task
-module.exports.updateTask = async (req, res) => {
+const updateTask = async (req, res) => {
   try {
     const { id } = req.params;
     const { name, description, status } = req.body;
     console.log(id, "id", name, "name", description, "des", status, "status");
+
     const updatedTask = await Task.findByIdAndUpdate(
       id,
       { name, description, status },
@@ -117,4 +114,13 @@ module.exports.updateTask = async (req, res) => {
     console.error(error);
     res.status(500).json({ message: "Server error" });
   }
+};
+
+module.exports = {
+  checkUser,
+  getTasks,
+  addTask,
+  deleteTask,
+  getTaskById,
+  updateTask,
 };

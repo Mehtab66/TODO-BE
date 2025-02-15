@@ -1,20 +1,22 @@
-var express = require("express");
-var router = express.Router();
-const Controller = require("../Controller/UserController");
-const { checkJwt } = require("../Middleware/isLoggedIn");
-router.post("/users", Controller.checkUser);
+const express = require("express");
+const { 
+  checkUser, 
+  getTasks, 
+  addTask, 
+  deleteTask, 
+  getTaskById, 
+  updateTask 
+} = require("../Controller/UserController.js");
 
-router.get("/tasks", checkJwt, Controller.getTasks);
-router.post("/task", checkJwt, Controller.addTask);
-router.delete("/task/:id", checkJwt, Controller.deleteTask);
-// router.put("/tasks/:id", Controller.updateTask);
+const { checkJwt } = require("../Middleware/isLoggedIn.js");
 
-// Fetch single task
-router.get("/task/:id", checkJwt, Controller.getTaskById);
+const router = express.Router();
 
-// Update task
-router.patch("/task/:id", checkJwt, Controller.updateTask);
+router.post("/users", checkUser);
+router.get("/tasks", checkJwt, getTasks);
+router.post("/task", checkJwt, addTask);
+router.delete("/task/:id", checkJwt, deleteTask);
+router.get("/task/:id", checkJwt, getTaskById);
+router.patch("/task/:id", checkJwt, updateTask);
 
-// router.post("/register", Controller.registerUser);
-// router.post("/login", Controller.loginUser);
 module.exports = router;

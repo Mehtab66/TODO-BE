@@ -17,7 +17,7 @@ const TaskSchema = new mongoose.Schema(
     status: {
       type: String,
       enum: ["Pending", "Completed", "In Progress"],
-      default: "pending",
+      default: "Pending",
     },
     isDeleted: {
       type: Boolean,
@@ -27,4 +27,6 @@ const TaskSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-module.exports = mongoose.model("Task", TaskSchema);
+const Task = mongoose.model("Task", TaskSchema);
+
+module.exports = Task;
