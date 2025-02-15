@@ -139,17 +139,6 @@ const registerUser = async (req, res) => {
       name: user.name, // Now including the name in response
       email: user.email,
     });
-    // const payload = {
-    //   user: {
-    //     id: user.id,
-    //     email: user.email,
-    //     name: user.name,
-    //   },
-    // };
-    // jwt.sign(payload, process.env.SECRET_KEY, (err, token) => {
-    //   if (err) throw err;
-    //   res.json({ token });
-    // });
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Server error" });
