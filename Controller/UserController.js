@@ -135,7 +135,6 @@ const registerUser = async (req, res) => {
     await user.save();
     console.log("user created");
     res.json({
-      token,
       name: user.name, // Now including the name in response
       email: user.email,
     });
