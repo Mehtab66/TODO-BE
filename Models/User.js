@@ -3,8 +3,6 @@ const mongoose = require("mongoose");
 const UserSchema = new mongoose.Schema({
   auth0Id: {
     type: String,
-    required: true,
-    unique: true,
   },
   name: {
     type: String,
@@ -14,6 +12,9 @@ const UserSchema = new mongoose.Schema({
     type: String,
     required: true,
     unique: true,
+  },
+  password: {
+    type: String,
   },
 });
 

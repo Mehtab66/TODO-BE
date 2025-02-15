@@ -1,5 +1,7 @@
 const User = require("../Models/User.js");
 const Task = require("../Models/Task.js");
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
 
 const checkUser = async (req, res) => {
   const { auth0Id, email, name } = req.body;
@@ -31,9 +33,11 @@ const getTasks = async (req, res) => {
     const tasks = await Task.find({ userId, isDeleted: { $ne: true } }).sort({
       createdAt: -1,
     });
+    console.log(tasks);
 
     res.json({ tasks });
   } catch (error) {
+    console.log(error);
     res.status(500).json({ error: "Failed to fetch tasks" });
   }
 };
@@ -41,6 +45,7 @@ const getTasks = async (req, res) => {
 // Add a task
 const addTask = async (req, res) => {
   try {
+    console.log("into the task");
     const { userId, name, description, status } = req.body;
     console.log(userId, name, description, status);
     const newTask = new Task({ userId, name, description, status });
@@ -97,7 +102,6 @@ const updateTask = async (req, res) => {
   try {
     const { id } = req.params;
     const { name, description, status } = req.body;
-    console.log(id, "id", name, "name", description, "des", status, "status");
 
     const updatedTask = await Task.findByIdAndUpdate(
       id,
@@ -116,6 +120,70 @@ const updateTask = async (req, res) => {
   }
 };
 
+//Controlller for Register User
+const registerUser = async (req, res) => {
+  try {
+    const { name, email, password } = req.body;
+    let user = await User.findOne({ email });
+
+    if (user) {
+      return res.status(400).json({ message: "User already exists" });
+    }
+    user = new User({ name, email, password });
+    const salt = await bcrypt.genSalt(10);
+    user.password = await bcrypt.hash(password, salt);
+    await user.save();
+    console.log("user created");
+    res.json({
+      token,
+      name: user.name, // Now including the name in response
+      email: user.email,
+    });
+    // const payload = {
+    //   user: {
+    //     id: user.id,
+    //     email: user.email,
+    //     name: user.name,
+    //   },
+    // };
+    // jwt.sign(payload, process.env.SECRET_KEY, (err, token) => {
+    //   if (err) throw err;
+    //   res.json({ token });
+    // });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+//Controller for Login
+const Login = async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    const user = await User.findOne({ email: email });
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      return res.status(400).json({ message: "Invalid credentials" });
+    }
+    const payload = {
+      user: {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+      },
+    };
+    jwt.sign(payload, process.env.SECRET_KEY, (err, token) => {
+      if (err) throw err;
+      res.json({ token, user });
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
 module.exports = {
   checkUser,
   getTasks,
@@ -123,4 +191,6 @@ module.exports = {
   deleteTask,
   getTaskById,
   updateTask,
+  Login,
+  registerUser,
 };
